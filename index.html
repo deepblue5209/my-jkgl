@@ -2024,6 +2024,32 @@
     // 首次加载
     initializeApp();
 </script>
+    <!-- ********** 新的 Firebase 代码块 ********** -->
+    <script type="module">
+      // 1. 引入您需要的 Firebase 服务模块（例如 Firestore 数据库和初始化函数）
+      import { initializeApp } from "www.gstatic.com";
+      import { getFirestore, collection, addDoc } from "www.gstatic.com";
+      
+      // 2. 您的项目配置信息（我使用了您截图中的数据）
+      const firebaseConfig = {
+        apiKey: "AIzaSyBzfiTmfQWG7abX_cIvMPpg4zadUFGykyk",
+        authDomain: "my-jkgl.firebaseapp.com",
+        projectId: "my-jkgl",
+        storageBucket: "my-jkgl.firebasestorage.app",
+        messagingSenderId: "872592562462",
+        appId: "1:872592562462:web:00aaf5f2b8fe1e76efd10f",
+        measurementId: "G-6NZR3YXVKZ"
+      };
+
+      // 3. 初始化 Firebase App 和 Firestore 数据库实例
+      const app = initializeApp(firebaseConfig);
+      const db = getFirestore(app);
+
+      // 4. 注意：您需要在这里继续添加您网站的交互逻辑，例如添加留言板表单和按钮的 JavaScript 代码
+      // ... 比如之前提到的 addMessage() 函数 ...
+
+    </script>
+    <!-- ********** 结束新的 Firebase 代码块 ********** -->
 
 </body>
 </html>
