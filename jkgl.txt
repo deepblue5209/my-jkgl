@@ -1,0 +1,2029 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>健康生活记录</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* 1. 全新的鲜明颜色变量 */
+        :root {
+            --primary: #4CAF50; /* 绿色 (Me) */
+            --water: #2196F3;   /* 蓝色 */
+            --food: #FF9800;    /* 橙色 (Family) */
+            --body: #9C27B0;    /* 紫色 */
+            --fitness: #00BCD4; /* 青色 */
+            --weight: #FFC107;  /* 琥珀色 */
+            --sleep: #673AB7;   /* 深紫 (Wife) */
+            --error: #F44336;   /* 红色 */
+            --edit: #FF9800;    /* 编辑按钮颜色 */
+
+            --bg: #f4f7f6;
+            --card-bg: #ffffff;
+            --text: #333;
+            --text-light: #666;
+            --shadow: 0 6px 16px rgba(0,0,0,0.1); /* 增强阴影 */
+            --radius: 16px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4edf5 100%);
+            margin: 0;
+            padding: 20px;
+            color: var(--text);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        /* 通用卡片样式 - 增加立体感 */
+        .card {
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: var(--shadow);
+            border: 1px solid #f0f0f0;
+        }
+        
+        h2 {
+            margin-bottom: 15px;
+            font-size: 1.3rem;
+            color: var(--text);
+            border-bottom: 2px solid var(--primary); 
+            padding-bottom: 10px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 25px;
+            padding: 20px;
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+        }
+
+        h1 { 
+            margin: 0;
+            font-size: 1.8rem; 
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        .header-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 10px;
+            flex-wrap: wrap;
+        }
+
+        .datetime-group {
+            display: flex;
+            flex-direction: column; 
+            align-items: flex-start;
+        }
+
+        p.date { 
+            color: var(--text-light);
+            font-size: 1rem; 
+            font-weight: 500;
+        }
+        
+        p.time {
+            color: var(--primary);
+            font-size: 1.1rem; 
+            font-weight: 700;
+            margin-top: 5px;
+        }
+
+        /* 用户标签切换样式 */
+        .user-tabs {
+            display: flex;
+            border: 1px solid var(--primary);
+            border-radius: 12px;
+            overflow: hidden;
+            margin-top: 10px;
+            flex-grow: 1;
+            margin-left: 10px;
+            max-width: 300px;
+        }
+
+        .user-tab {
+            flex: 1;
+            text-align: center;
+            padding: 8px 10px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--primary);
+            background-color: #e8f5e9; 
+            transition: all 0.2s;
+            border-right: 1px solid var(--primary);
+        }
+        .user-tab:last-child { border-right: none;
+        }
+
+        .user-tab:hover {
+            background-color: #dcedc8;
+        }
+
+        .user-tab.active {
+            background-color: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        /* 按钮通用样式 */
+        button {
+            border: none;
+            padding: 12px 18px;
+            border-radius: 10px;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: 600;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1); 
+        }
+        
+        button:hover { opacity: 0.9;
+            transform: translateY(-2px); box-shadow: 0 6px 12px rgba(0,0,0,0.15); }
+        button:active { transform: scale(0.97);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        
+        /* 输入框通用样式 */
+        input[type="text"], input[type="number"], select {
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid #c9d7e5; 
+            flex-grow: 1;
+            font-size: 1rem;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        input:focus, select:focus {
+            border-color: var(--water);
+            box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.2);
+            outline: none;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            align-items: center;
+            flex-wrap: wrap; 
+        }
+        .input-group button, .input-group input, .input-group select {
+            min-height: 40px;
+        }
+        
+        /* NEW: 体重指标多输入字段布局 */
+        .weight-fields {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        .weight-fields input {
+            flex: 1;
+        }
+        .weight-fields .calculated-bmi {
+             flex: 1;
+             padding: 10px;
+             border-radius: 8px;
+             background-color: #e0f7fa;
+             border: 1px dashed var(--fitness);
+             text-align: center;
+             font-weight: 600;
+             color: var(--fitness);
+             min-width: 80px;
+             white-space: nowrap;
+        }
+
+        /* 饮水记录横向排列 */
+        .water-controls {
+            display: flex;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        .btn-water { background: var(--water); flex: 1;
+            box-shadow: 0 3px 8px rgba(33, 150, 243, 0.4); }
+        
+        /* 进度条样式 */
+        .progress-container {
+            background-color: #e0f7fa;
+            border-radius: 12px;
+            height: 30px;
+            overflow: hidden;
+            margin-top: 15px;
+            position: relative;
+        }
+        .progress-bar {
+            height: 100%;
+            width: 0%;
+            transition: width 0.5s ease-in-out;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding-right: 10px;
+            background: linear-gradient(90deg, var(--water), #64b5f6);
+        }
+        .progress-text {
+            color: white;
+            font-weight: bold;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+            font-size: 0.9rem;
+            position: absolute; 
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        .water-info {
+             display: flex;
+             justify-content: space-between;
+             font-weight: 600;
+             font-size: 1.1rem;
+        }
+        .water-goal { color: var(--text-light);
+        }
+
+        /* 体重与睡眠按钮 */
+        .btn-weight { background: var(--weight);
+            box-shadow: 0 3px 8px rgba(255, 193, 7, 0.4); }
+        .btn-sleep { background: var(--sleep);
+            box-shadow: 0 3px 8px rgba(103, 58, 183, 0.4); }
+        .btn-food { background: var(--food);
+            box-shadow: 0 3px 8px rgba(255, 152, 0, 0.4); }
+        .btn-edit { 
+            background: var(--fitness);
+            box-shadow: 0 3px 8px rgba(0, 188, 212, 0.4); 
+            padding: 12px 10px;
+        }
+        .btn-fitness { background: var(--fitness); box-shadow: 0 3px 8px rgba(0, 188, 212, 0.4);
+        }
+        
+        /* 生理记录横向并排 */
+        .body-controls {
+            display: flex;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        .btn-pee { 
+            background: #E1BEE7;
+            color: var(--body); 
+            flex: 1; 
+            box-shadow: 0 3px 8px rgba(156, 39, 176, 0.2);
+        }
+        .btn-poop { 
+            background: var(--body);
+            flex: 1; 
+            box-shadow: 0 3px 8px rgba(156, 39, 176, 0.4);
+        }
+
+        /* 导出/清空按钮样式 */
+        .action-buttons {
+            display: flex;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        .btn-export {
+            background: var(--fitness);
+            flex: 1;
+            box-shadow: 0 3px 8px rgba(0, 188, 212, 0.4);
+        }
+        .btn-clear {
+            background: var(--error);
+            flex: 1;
+            box-shadow: 0 3px 8px rgba(244, 67, 54, 0.4);
+        }
+
+        /* 饮食记录状态修正：保持置灰效果 */
+        .diet-meal-group.recorded input[type="text"],
+        .diet-meal-group.recorded input[type="number"] {
+            background-color: #e9ecef;
+            border-color: #dee2e6;
+            pointer-events: none;
+            color: var(--text-light);
+            box-shadow: none;
+        }
+        
+        .meal-content-display {
+            margin-top: 10px;
+            padding: 8px 10px;
+            font-size: 0.95rem;
+            color: var(--food);
+            background-color: #fff8e1;
+            border-radius: 6px;
+            border-left: 5px solid var(--food);
+            font-weight: 500;
+        }
+
+        /* 今日动态列表样式 */
+        .log-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            list-style: none;
+            padding: 12px 0;
+            border-bottom: 1px solid #ddd;
+        }
+        .log-item:last-child {
+             border-bottom: none;
+        }
+        .log-group-title {
+            font-weight: 700;
+            color: var(--sleep); 
+            font-size: 1.1rem;
+            margin-top: 15px;
+            padding: 5px 0;
+            list-style: none;
+            border-bottom: 2px solid var(--sleep);
+        }
+        .log-content {
+            flex-grow: 1;
+            font-size: 0.95rem;
+            color: var(--text);
+            display: flex;
+            align-items: center;
+        }
+        .log-content i.log-icon {
+            margin-right: 5px;
+            min-width: 15px; 
+        }
+        .log-time { 
+            color: var(--text);
+            font-size: 0.8rem; 
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 500;
+            flex-shrink: 0; 
+            white-space: nowrap; 
+            margin-left: 10px;
+        }
+        .log-del {
+            color: var(--error) !important;
+            cursor: pointer; 
+            margin-left: 5px;
+        }
+        .log-edit {
+            color: var(--edit) !important;
+            cursor: pointer; 
+        }
+
+        /* 用户标签样式 */
+        .log-user-tag {
+            display: inline-block;
+            padding: 2px 8px;
+            margin-right: 8px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: white;
+            /* 默认颜色 Me: --primary (绿色) */
+            background-color: var(--primary);
+        }
+
+        .log-user-tag.user-wife {
+            /* Wife: 使用 --sleep (深紫) */
+            background-color: var(--sleep);
+        }
+
+        .log-user-tag.user-family {
+            /* Family: 使用 --food (橙色) */
+            background-color: var(--food);
+        }
+
+        /* 今日动态空状态修正 */
+        .empty-state {
+            text-align: center;
+            padding: 30px !important;
+        }
+        .empty-state i.fas {
+            font-size: 2.5rem !important;
+            color: var(--sleep) !important; 
+        }
+        .empty-state p {
+            color: var(--water) !important;
+            margin-top: 10px;
+            font-size: 1rem;
+            font-weight: 500;
+        }
+        
+        /* 昨日总结卡片样式 */
+        .summary-section h2 {
+            border-bottom: 2px solid var(--fitness);
+        }
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 15px;
+            margin-top: 10px;
+        }
+        .summary-item {
+            background-color: #f7f7f7;
+            padding: 12px;
+            border-radius: 10px;
+            border-left: 5px solid var(--primary);
+            text-align: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        .summary-item strong {
+            display: block;
+            font-size: 0.85rem;
+            color: var(--text-light);
+            margin-bottom: 5px;
+        }
+        .summary-item span {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--text);
+        }
+        .summary-item.water { border-left-color: var(--water);
+        }
+        .summary-item.calorie { border-left-color: var(--food);
+        }
+        .summary-item.sleep { border-left-color: var(--sleep);
+        }
+        .summary-item.count { border-left-color: var(--body);
+        }
+
+        /* 通知栏样式 */
+        .notification {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: var(--primary);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.4s ease-in-out;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 600;
+        }
+        .notification.show {
+            opacity: 1;
+            visibility: visible;
+            transform: translateX(-50%) translateY(0);
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1><i class="fas fa-heartbeat"></i> 健康生活记录</h1>
+        <div class="header-info">
+            <div class="datetime-group"> 
+                <p class="date" id="currentDate">loading...</p>
+                <p class="time" id="currentTime"></p>
+            </div>
+    
+            <div class="user-tabs" id="userTabs">
+                <span class="user-tab active" data-user="Me" onclick="switchUser('Me')">我</span>
+                <span class="user-tab" data-user="Wife" onclick="switchUser('Wife')">老婆</span>
+                <span class="user-tab" data-user="Family" onclick="switchUser('Family')">家人</span>
+            </div>
+        </div>
+    </header>
+
+    <section class="card water-section">
+  
+        <h2><i class="fas fa-tint" style="color: var(--water);"></i> 饮水记录 (当前用户: <span id="currentUserName_Water">我</span>)</h2>
+        <div class="water-info">
+            <span id="waterTotal">0 ml</span>
+            <span class="water-goal">目标: 2000 ml</span>
+        </div>
+        <div class="progress-container">
+            <div class="progress-bar" id="waterBar">
+                <span 
+                    class="progress-text" id="progressText">0%</span>
+            </div>
+        </div>
+        <div class="water-controls">
+            <button class="btn-water" onclick="addRecord('water', 200)"><i class="fas fa-plus"></i> 200ml</button>
+            <button class="btn-water" onclick="addRecord('water', 350)"><i class="fas fa-plus"></i> 350ml</button>
+            <button class="btn-water" onclick="addRecord('water', 500)"><i class="fas fa-plus"></i> 500ml</button>
+        </div>
+    </section>
+
+    
+    <section class="card weight-section">
+        <h2><i class="fas fa-weight" style="color: var(--weight);"></i> 体重记录 (当前用户: <span id="currentUserName_Weight">我</span>)</h2>
+        <div class="weight-fields">
+             <input type="number" id="weightInput" placeholder="体重 (kg)" step="0.1" min="1" title="体重">
+             <input type="number" id="bodyFatInput" placeholder="体脂率 (%)" step="0.1" min="1" max="100" title="体脂率">
+             <div class="calculated-bmi" id="bmiDisplay">BMI: N/A</div>
+        </div>
+        <div class="input-group">
+            <button class="btn-weight" onclick="addWeight()"><i class="fas fa-upload"></i> 记录体重/体脂</button>
+        </div>
+    </section>
+    
+    <section class="card sleep-section">
+        <h2><i class="fas fa-moon" style="color: var(--sleep);"></i> 睡眠记录 (当前用户: 
+            <span id="currentUserName_Sleep">我</span>)</h2>
+        <div class="input-group">
+            <input type="text" id="sleepTime" placeholder="睡眠时长，例如：7h30min" title="睡眠时长">
+            <button class="btn-sleep" onclick="addSleep()"><i class="fas fa-bed"></i> 记录睡眠</button>
+        </div>
+    </section>
+
+    <section class="card food-section">
+        <h2><i class="fas fa-utensils" style="color: var(--food);"></i> 饮食打卡 (当前用户: <span id="currentUserName_Food">我</span>)</h2>
+        
+        <div id="calorieTotalDisplay" style="text-align: right;
+            margin-bottom: 20px; font-size: 1.1rem; font-weight: bold; color: var(--food);">
+            今日总热量: <span id="totalCalories">0</span> Kcal
+        </div>
+        
+        <div class="diet-meal-group" id="mealGroup_breakfast">
+            <div class="input-group">
+                <input type="text" id="foodInput_breakfast" placeholder="早餐内容，例如：燕麦牛奶...">
+                <input type="number" id="calorieInput_breakfast" placeholder="热量(Kcal)" 
+                    min="0" style="flex: 0.5; min-width: 80px;">
+                <button class="btn-food meal-record-btn" id="recordBtn_breakfast" onclick="addMeal('breakfast')"><i class="fas fa-check"></i> 记录</button>
+                <button class="btn-edit meal-edit-btn" id="editBtn_breakfast" onclick="editMeal('breakfast')" style="display:none;"><i class="fas fa-edit"></i> 修改</button>
+            </div>
+            <div class="meal-content-display" id="display_breakfast" style="display: none;"></div>
+        </div>
+        
+     
+        <div class="diet-meal-group" id="mealGroup_lunch">
+            <div class="input-group">
+                <input type="text" id="foodInput_lunch" placeholder="午餐内容，例如：鸡胸肉沙拉...">
+                <input type="number" id="calorieInput_lunch" placeholder="热量(Kcal)" min="0" style="flex: 0.5;
+                    min-width: 80px;">
+                <button class="btn-food meal-record-btn" id="recordBtn_lunch" onclick="addMeal('lunch')"><i class="fas fa-check"></i> 记录</button>
+                <button class="btn-edit meal-edit-btn" id="editBtn_lunch" onclick="editMeal('lunch')" style="display:none;"><i class="fas fa-edit"></i> 修改</button>
+            </div>
+            <div class="meal-content-display" id="display_lunch" style="display: none;"></div>
+        </div>
+        
+        
+        <div class="diet-meal-group" id="mealGroup_dinner">
+            <div class="input-group">
+                <input type="text" id="foodInput_dinner" placeholder="晚餐内容，例如：蔬菜汤...">
+                <input type="number" id="calorieInput_dinner" placeholder="热量(Kcal)" min="0" style="flex: 0.5;
+                    min-width: 80px;">
+                <button class="btn-food meal-record-btn" id="recordBtn_dinner" onclick="addMeal('dinner')"><i class="fas fa-check"></i> 记录</button>
+                <button class="btn-edit meal-edit-btn" id="editBtn_dinner" onclick="editMeal('dinner')" style="display:none;"><i class="fas fa-edit"></i> 修改</button>
+            </div>
+            <div class="meal-content-display" id="display_dinner" style="display: none;"></div>
+        </div>
+    </section>
+    
+    <section class="card fitness-section">
+  
+        <h2><i class="fas fa-running" style="color: var(--fitness);"></i> 运动记录 (当前用户: <span id="currentUserName_Fitness">我</span>)</h2>
+        <div class="input-group">
+            <select id="fitnessType" title="运动类型">
+                <option value="running">跑步</option>
+                <option value="walking">步行</option>
+                <option value="weightlifting">力量</option>
+            
+                <option value="yoga">瑜伽</option>
+                <option value="other">其他</option>
+            </select>
+            <input type="number" id="fitnessDuration" placeholder="时长 (分钟)" min="1" title="运动时长">
+            <input type="number" id="fitnessCalories" placeholder="卡路里 (Kcal)" min="0" title="消耗卡路里">
+            <button class="btn-fitness" onclick="addFitness()"><i class="fas fa-dumbbell"></i> 记录运动</button>
+        </div>
+    </section>
+
+ 
+    <section class="card body-section">
+        <h2><i class="fas fa-restroom" style="color: var(--body);"></i> 生理记录 (当前用户: <span id="currentUserName_Body">我</span>)</h2>
+        <div class="body-controls">
+            <button class="btn-pee" onclick="addRecord('pee', '排尿')"><i class="fas fa-tint"></i> 记录排尿</button>
+            <button class="btn-poop" onclick="addRecord('poop', '排便')"><i class="fas fa-poop"></i> 记录排便</button>
+        </div>
+    </section>
+
+    <section class="card summary-section">
+        <h2><i class="fas fa-chart-bar" style="color: var(--fitness);"></i> 数据汇总与对比 (今日 VS 昨日，按用户)</h2>
+        <div id="summaryComparison">
+             <p style="text-align: center; color: var(--text-light);">正在加载数据...</p>
+        </div>
+    </section>
+    
+    <section class="card log-section">
+        <h2><i class="fas fa-list-alt" style="color: var(--text);"></i> 今日动态 (合并显示所有用户记录)</h2>
+        <div style="margin-bottom: 15px;
+            display: flex; align-items: center; gap: 10px;">
+            <label for="logSort" style="font-size: 0.9rem;
+                color: var(--text-light); white-space: nowrap;">排序方式:</label>
+            <select id="logSort" onchange="saveAndRender()" style="flex: 1;
+                min-width: 120px; padding: 8px; border-radius: 8px; border: 1px solid #c9d7e5;">
+                <option value="user_category">按标签排序 (用户 > 类别)</option>
+                <option value="category">按类别顺序 (常识)</option>
+                <option value="time">按时间顺序 (最早上)</option>
+            </select>
+        </div>
+        <ul class="log-list" id="logList">
+     
+        </ul>
+        <div class="action-buttons">
+            <button class="btn-export" onclick="exportDataToCSV()"><i class="fas fa-file-export"></i> 导出数据</button>
+            <button class="btn-clear" onclick="clearData()"><i class="fas fa-trash-alt"></i> 清空今日</button>
+        </div>
+        <div class="action-buttons" style="margin-top: 10px;">
+            <input type="file" id="importFile" accept=".csv" style="display: none;" onchange="importDataFromCSV(event)">
+            <button class="btn-fitness" style="flex: 1;" onclick="document.getElementById('importFile').click();">
+                <i class="fas fa-file-import"></i> 导入数据 (.csv)
+            </button>
+        </div>
+    </section>
+</div>
+
+<div class="notification" id="notification">
+    <i class="fas fa-check-circle"></i>
+    <span id="notificationText">操作成功！</span>
+</div>
+
+<script>
+    // =======================================================================
+    // 全局常量与变量
+    // =======================================================================
+    const GOAL_WATER = 2000;
+    const RECORD_COOLDOWN_MS = 5000;
+    // NEW: 假设的身高 (米)，用于计算 BMI。
+    const DEFAULT_HEIGHT = 1.75; 
+    
+    let currentUser = 'Me'; // 当前操作的用户
+    let logs = []; // 仅存储当前用户的全部历史记录 (用于输入和统计)
+    let allTodayLogs = []; // 存储所有用户的今日记录 (用于动态列表显示)
+    
+    // NEW: 用于今日与昨日数据对比
+    window.todaySummary = {}; 
+    window.yesterdaySummary = {};
+
+    let lastRecordTime = {};
+    // 每日独一记录类型
+    const DAILY_UNIQUE_TYPES = ['weight', 'sleep'];
+    // 日志类型到中文名称的映射
+    const TYPE_NAMES = {
+        weight: '体重记录',
+        breakfast: '早餐',
+        lunch: '午餐',
+        dinner: '晚餐',
+        fitness: '运动记录',
+        water: '饮水记录',
+        pee: '排尿打卡',
+        poop: '排便打卡',
+        sleep: '睡眠记录',
+        food_breakfast: '早餐',
+        food_lunch: '午餐',
+        food_dinner: '晚餐'
+    };
+    // 日志类型排序优先级 (常识顺序)
+    const LOG_SORT_ORDER = {
+        'weight': 10,
+        'food_breakfast': 20,
+        'food_lunch': 30,
+        'food_dinner': 40,
+        'fitness': 50,
+        'water': 60,
+        'pee': 70,
+        'poop': 71,
+        'sleep': 80
+    };
+    // 用户排序优先级 (标签排序的依据)
+    const USER_SORT_ORDER = {
+        'Me': 1,
+        'Wife': 2,
+        'Family': 3
+    };
+    // 定义颜色变量映射
+    const TYPE_COLORS = {
+        water: 'var(--water)',
+        food: 'var(--food)',
+        pee: 'var(--body)', 
+        poop: 'var(--body)',
+        fitness: 'var(--fitness)',
+        weight: 'var(--weight)',
+        sleep: 'var(--sleep)'
+    };
+    const userMap = { Me: '我', Wife: '老婆', Family: '家人' };
+    
+    // =======================================================================
+    // 工具函数：日期处理
+    // =======================================================================
+    function getFormatedDateString(date) {
+        return date.toLocaleDateString('zh-CN', { 
+            year: 'numeric', 
+            month: 'long', 
+            day: 'numeric', 
+            weekday: 'long',
+            timeZone: 'Asia/Shanghai'
+        });
+    }
+
+    function getDateStr(date) {
+         // 获取日期的字符串形式，用于匹配
+        return date.toDateString();
+    }
+    
+    function getYesterday() {
+        const yesterday = new Date();
+        yesterday.setDate(yesterday.getDate() - 1);
+        return yesterday;
+    }
+
+    // NEW: 计算 BMI 的公式
+    function calculateBMI(weight, height = DEFAULT_HEIGHT) {
+        if (!weight || weight <= 0 || !height || height <= 0) {
+            return 'N/A';
+        }
+        // BMI = 体重 (kg) / 身高^2 (m^2)
+        const bmi = weight / (height * height);
+        return bmi.toFixed(1);
+    }
+
+    // =======================================================================
+    // 时间修改逻辑
+    // =======================================================================
+    function modifyLogTime(originalUser, timestamp) {
+        const logDate = new Date(timestamp);
+        const currentDateStr = logDate.toLocaleDateString('zh-CN');
+        
+        // 弹出时间输入框，默认显示原时间
+        const currentTime = logDate.toLocaleTimeString('zh-CN', { 
+            hour: '2-digit', 
+            minute: '2-digit', 
+            second: '2-digit', 
+            hour12: false 
+        });
+        
+        const newTime = prompt(`修改记录时间 (日期 ${currentDateStr} 保持不变):`, currentTime);
+        
+        if (newTime === null) return; // 用户取消
+        
+        // 验证时间格式 (HH:MM:SS 或 HH:MM)
+        const timeRegex = /^([01]?[0-9]|2[0-3]):[0-5][0-9](:[0-5][0-9])?$/;
+        if (!timeRegex.test(newTime)) {
+            showNotification("时间格式不正确，请使用 HH:MM:SS 或 HH:MM 格式", "error");
+            return;
+        }
+        
+        // 确保时间格式完整 (补全秒数)
+        let fullTime = newTime;
+        if (fullTime.split(':').length === 2) {
+            fullTime += ':00'; // 如果没有秒数，补全为00秒
+        }
+        
+        // 创建新的时间戳：保持原日期，使用新时间
+        const [hours, minutes, seconds] = fullTime.split(':').map(Number);
+        const newDate = new Date(logDate);
+        newDate.setHours(hours, minutes, seconds, 0);
+        
+        const newTimestamp = newDate.getTime();
+        
+        // 更新记录时间
+        updateLogTimestamp(originalUser, timestamp, newTimestamp);
+    }
+
+    function updateLogTimestamp(originalUser, oldTimestamp, newTimestamp) {
+        // 1. 获取目标用户的 logs 数组
+        let userLogsStr = localStorage.getItem(getStorageKey(originalUser));
+        let userLogs = userLogsStr ? JSON.parse(userLogsStr) : [];
+
+        // 2. 找到记录并更新时间戳
+        const logIndex = userLogs.findIndex(log => log.timestamp === oldTimestamp);
+        
+        if (logIndex !== -1) {
+            userLogs[logIndex].timestamp = newTimestamp;
+            
+            // 3. 存回 localStorage
+            localStorage.setItem(getStorageKey(originalUser), JSON.stringify(userLogs));
+            
+            // 4. 如果修改的是当前用户的数据，需要更新内存中的 logs
+            if (originalUser === currentUser) {
+                const currentLogIndex = logs.findIndex(log => log.timestamp === oldTimestamp);
+                if (currentLogIndex !== -1) {
+                    logs[currentLogIndex].timestamp = newTimestamp;
+                }
+            }
+            
+            showNotification(`[${userMap[originalUser]}] 记录时间修改成功`, "success");
+            
+            // 5. 刷新所有列表和统计
+            saveAndRender();
+        } else {
+            showNotification("记录不存在或已被删除", "error");
+        }
+    }
+
+    // =======================================================================
+    // 数据存取逻辑
+    // =======================================================================
+
+    function getStorageKey(user) {
+        return `healthLogs_${user}`;
+    }
+
+    function loadLogsForUser(user) {
+        try {
+            const storedLogs = localStorage.getItem(getStorageKey(user));
+            logs = storedLogs ? JSON.parse(storedLogs) : [];
+        } catch (e) {
+            console.error(`读取 ${user} localStorage失败:`, e);
+            logs = [];
+            showNotification(`[${user}] 数据读取失败，已重置`, "error");
+        }
+    }
+
+    function saveLogsForUser(user) {
+        try {
+            localStorage.setItem(getStorageKey(user), JSON.stringify(logs));
+        } catch (e) {
+            console.error(`LocalStorage 保存 ${user} 数据失败:`, e);
+            showNotification(`[${user}] 数据保存失败！`, "error");
+        }
+    }
+
+    // 辅助函数：加载所有用户在指定日期的记录，并应用每日独一逻辑
+    function loadLogsForDate(targetDate) {
+        const users = ['Me', 'Wife', 'Family'];
+        const targetDateStr = getDateStr(targetDate);
+        let mergedLogs = [];
+
+        users.forEach(user => {
+            try {
+                const storedLogs = localStorage.getItem(getStorageKey(user));
+                const userLogs = storedLogs ? JSON.parse(storedLogs) : [];
+                
+                // 筛选出目标日期的记录
+                const dayUserLogs = 
+                    userLogs.filter(log => getDateStr(new Date(log.timestamp)) === targetDateStr);
+
+                // 区分非独一记录和独一记录
+                const logsWithoutUnique = dayUserLogs.filter(log => 
+                    !DAILY_UNIQUE_TYPES.includes(log.type)
+                );
+
+                // 对于独一记录，只保留最新一条
+                DAILY_UNIQUE_TYPES.forEach(type => {
+                    
+                    const latestLog = dayUserLogs
+                        .filter(log => log.type === type)
+                        .sort((a, b) => b.timestamp - a.timestamp) 
+                        [0]; 
+
+              
+                    if (latestLog) {
+                        logsWithoutUnique.push(latestLog);
+                    }
+                });
+
+                logsWithoutUnique.forEach((log) => {
+              
+                    // 关键：添加用户标签到日志对象
+                    const taggedLog = { ...log, originalUser: user };
+                    mergedLogs.push(taggedLog);
+                });
+                
+            } catch (e) {
+                console.error(`读取 ${user} localStorage失败:`, e);
+            }
+        });
+        return mergedLogs;
+    }
+
+    function loadAllTodayLogs() {
+        return loadLogsForDate(new Date());
+    }
+
+    // =======================================================================
+    // 2. 数据汇总与对比逻辑 (按用户分别对比)
+    // =======================================================================
+
+    // 辅助函数：计算单日【指定用户】的总览数据
+    function calculateDaySummary(dayLogs, targetUser) {
+        let summary = {
+            waterSum: 0,
+            calorieSum: 0,
+            peeCount: 0,
+            poopCount: 0,
+            fitnessCount: 0
+        };
+
+        dayLogs
+             // 筛选出指定用户（或所有用户如果 targetUser 为 null/undefined）
+            .filter(log => !targetUser || log.originalUser === targetUser)
+            .forEach(log => {
+                if (log.type === 'water') {
+                    summary.waterSum += log.val;
+                } else if (log.type === 'food') {
+                    summary.calorieSum += log.val.calories || 0;
+                } else if (log.type === 'fitness') {
+                     summary.calorieSum += log.val.calories || 0;
+                     summary.fitnessCount += 1;
+                } else if (log.type === 'pee') {
+                    summary.peeCount += 1;
+                } else if (log.type === 'poop') {
+                  summary.poopCount += 1;
+                }
+                // 体重和睡眠不在此处计算，它们在 renderComparison 中统一处理
+            });
+        return summary;
+    }
+
+    // 辅助函数：提取每日独一记录（用于体重和睡眠的统一展示）
+    function extractUniqueLogs(dayLogs, type) {
+        let logsMap = {};
+        const uniqueUsers = new Set();
+        
+        dayLogs.forEach(log => {
+            if (log.type === type) {
+                // 确保只取最新的一条
+                if (!uniqueUsers.has(log.originalUser) || log.timestamp > (logsMap[log.originalUser]?.timestamp || 0)) {
+                    logsMap[log.originalUser] = log.val;
+                    uniqueUsers.add(log.originalUser);
+                }
+            }
+        });
+        return logsMap;
+    }
+
+    // 计算并存储所有用户的今日/昨日数据
+    function calculateAllUsersSummary() {
+        const todayLogs = loadLogsForDate(new Date());
+        const yesterday = getYesterday();
+        const yesterdayLogs = loadLogsForDate(yesterday);
+        const users = ['Me', 'Wife', 'Family'];
+        
+        window.todaySummary = {};
+        window.yesterdaySummary = {};
+
+        // 计算每个用户的汇总数据
+        users.forEach(user => {
+            window.todaySummary[user] = calculateDaySummary(todayLogs, user);
+            window.yesterdaySummary[user] = calculateDaySummary(yesterdayLogs, user);
+        });
+
+        // 统一提取体重和睡眠
+        window.todaySummary.uniqueLogs = {
+            weight: extractUniqueLogs(todayLogs, 'weight'),
+            sleep: extractUniqueLogs(todayLogs, 'sleep')
+        };
+        window.yesterdaySummary.uniqueLogs = {
+            weight: extractUniqueLogs(yesterdayLogs, 'weight'),
+            sleep: extractUniqueLogs(yesterdayLogs, 'sleep')
+        };
+        
+        // 渲染对比在 saveAndRender 中调用
+    }
+    
+    function calculateYesterdaySummary() {
+        calculateAllUsersSummary();
+    }
+    
+    // NEW: 渲染对比数据 (按用户分组)
+    function renderComparison() {
+        const todaySummary = window.todaySummary || {};
+        const yesterdaySummary = window.yesterdaySummary || {};
+        const container = document.getElementById('summaryComparison'); 
+        const users = ['Me', 'Wife', 'Family'];
+        
+        let mainHtml = '';
+
+        // Helper to compare and format change
+        const getComparisonText = (todayVal, yesterdayVal, unit) => {
+            if (yesterdayVal === undefined || yesterdayVal === 0 || yesterdayVal === '') {
+                return `<span style="color: var(--text-light); font-weight: 500; font-size: 0.9rem;">(昨日无记录)</span>`;
+            }
+            const diff = todayVal - yesterdayVal;
+            const diffSign = diff > 0 ? '↑' : (diff < 0 ? '↓' : '-');
+            // Calorie (热量) 和 Count (次数) 倾向于越少越好 (此定义可调整)
+            const isNegativeBetter = ['Kcal', '次'].includes(unit); 
+            let diffColor = 'var(--text-light)';
+
+            if (diff !== 0) {
+                if (isNegativeBetter) {
+                    diffColor = diff < 0 ? 'var(--primary)' : 'var(--error)';
+                } else {
+                    diffColor = diff > 0 ? 'var(--primary)' : 'var(--error)';
+                }
+            }
+            
+            const diffValue = Math.abs(diff);
+
+            return `<div style="font-size: 0.9rem; color: ${diffColor}; margin-top: 5px; font-weight: 600;">
+                        ${diffSign}${diffValue} ${unit} (比昨日)
+                    </div>`;
+        };
+        
+        // --- 1. 渲染按用户分组的对比数据 ---
+        let hasData = false;
+        users.forEach(user => {
+            const tSum = todaySummary[user] || {};
+            const ySum = yesterdaySummary[user] || {};
+            
+            const userTagClass = `user-${user.toLowerCase()}`;
+            const waterColor = user === 'Me' ? 'var(--water)' : 'var(--primary)'; 
+
+            // 检查是否有今日或昨日数据，如果都没有则跳过该用户对比
+            if (tSum.waterSum === 0 && tSum.calorieSum === 0 && tSum.fitnessCount === 0 && tSum.peeCount === 0 && tSum.poopCount === 0 &&
+                ySum.waterSum === 0 && ySum.calorieSum === 0 && ySum.fitnessCount === 0 && ySum.peeCount === 0 && ySum.poopCount === 0) {
+                return;
+            }
+            hasData = true;
+
+            const waterCompare = getComparisonText(tSum.waterSum || 0, ySum.waterSum || 0, 'ml');
+            const calorieCompare = getComparisonText(tSum.calorieSum || 0, ySum.calorieSum || 0, 'Kcal');
+            const fitnessCompare = getComparisonText(tSum.fitnessCount || 0, ySum.fitnessCount || 0, '次');
+            const countToday = (tSum.peeCount || 0) + (tSum.poopCount || 0);
+            const countYesterday = (ySum.peeCount || 0) + (ySum.poopCount || 0);
+            const countCompare = getComparisonText(countToday, countYesterday, '次');
+
+
+            mainHtml += `
+                <h3 style="margin-top: 15px; border-bottom: 2px solid var(--primary); padding-bottom: 5px; font-size: 1.1rem;">
+                    <span class="log-user-tag ${userTagClass}" style="margin-right: 8px;">${userMap[user]}</span> 数据对比
+                </h3>
+                <div class="summary-grid" style="margin-top: 10px;">
+                    <div class="summary-item water" style="border-left-color: ${waterColor};">
+                        <strong>饮水总量 (ml)</strong>
+                        <span>${tSum.waterSum || 0}</span>
+                        ${waterCompare}
+                    </div>
+                    <div class="summary-item calorie" style="border-left-color: var(--food);">
+                        <strong>总热量 (Kcal)</strong>
+                        <span>${tSum.calorieSum || 0}</span>
+                        ${calorieCompare}
+                    </div>
+                    <div class="summary-item count" style="border-left-color: var(--fitness);">
+                        <strong>运动次数 (次)</strong>
+                        <span>${tSum.fitnessCount || 0}</span>
+                        ${fitnessCompare}
+                    </div>
+                    <div class="summary-item count" style="border-left-color: var(--body);">
+                        <strong>排泄次数 (次)</strong>
+                        <span>${countToday}</span>
+                        ${countCompare}
+                    </div>
+                </div>
+            `;
+        });
+        
+        // --- 2. 渲染统一的唯一记录 (体重和睡眠) ---
+        const todayWeightLog = todaySummary.uniqueLogs?.weight || {};
+        const yesterdayWeightLog = yesterdaySummary.uniqueLogs?.weight || {};
+        const todaySleepLog = todaySummary.uniqueLogs?.sleep || {};
+        const yesterdaySleepLog = yesterdaySummary.uniqueLogs?.sleep || {};
+
+        // Helper to generate detail text for unique logs
+        const generateDetailText = (todayLog, yesterdayLog, unit, icon, color, title) => {
+            if (Object.keys(todayLog).length === 0 && Object.keys(yesterdayLog).length === 0) return '';
+            
+            let html = `<p style="margin-top: 10px; padding-bottom: 5px; border-bottom: 1px dotted #ccc;">
+                <i class="fas ${icon}" style="color: ${color}; min-width: 15px;"></i> 
+                <strong>${title} - 今日:</strong> `;
+            const todayText = Object.keys(todayLog).map(user => {
+                let displayVal = todayLog[user];
+                let weightVal = '';
+                if(title === '体重' && typeof displayVal === 'object') {
+                    weightVal = `W:${displayVal.weight}kg / BF:${displayVal.bodyFat}% / BMI:${displayVal.bmi}`;
+                } else if(title === '体重' && typeof displayVal !== 'object') {
+                    // 兼容旧格式，如果值不是对象，就只显示体重
+                    weightVal = `${displayVal}${unit}`;
+                } else {
+                    weightVal = `${displayVal}${unit}`;
+                }
+                return `<span class="log-user-tag user-${user.toLowerCase()}">${userMap[user]}</span> ${weightVal}`;
+            }).join(' | ');
+            html += `${todayText || '无记录'}`;
+
+            html += `<br><i class="fas ${icon}" style="color: ${color}; opacity: 0.6; min-width: 15px;"></i> 
+                <strong>${title} - 昨日:</strong> `;
+            const yesterdayText = Object.keys(yesterdayLog).map(user => {
+                let displayVal = yesterdayLog[user];
+                let weightVal = '';
+                if(title === '体重' && typeof displayVal === 'object') {
+                    weightVal = `W:${displayVal.weight}kg / BF:${displayVal.bodyFat}% / BMI:${displayVal.bmi}`;
+                } else if(title === '体重' && typeof displayVal !== 'object') {
+                    weightVal = `${displayVal}${unit}`;
+                } else {
+                    weightVal = `${displayVal}${unit}`;
+                }
+                return `<span class="log-user-tag user-${user.toLowerCase()}">${userMap[user]}</span> ${weightVal}`;
+            }).join(' | ');
+            html += `${yesterdayText || '无记录'}`;
+            
+            html += `</p>`;
+            return html;
+        };
+
+        const uniqueHtml = `
+            <div style="margin-top: 25px; padding: 10px; border-top: 2px dashed #ddd; font-size: 0.95rem;">
+                <h3 style="font-size: 1.1rem; color: var(--text-light); margin-bottom: 10px;">体重与睡眠 (每日独一)</h3>
+                ${generateDetailText(todayWeightLog, yesterdayWeightLog, 'kg', 'fa-weight', TYPE_COLORS.weight, '体重')}
+                ${generateDetailText(todaySleepLog, yesterdaySleepLog, '', 'fa-bed', TYPE_COLORS.sleep, '睡眠')}
+            </div>
+        `;
+        
+        if (!mainHtml && Object.keys(todayWeightLog).length === 0 && Object.keys(todaySleepLog).length === 0 && Object.keys(yesterdayWeightLog).length === 0 && Object.keys(yesterdaySleepLog).length === 0) {
+            container.innerHTML = `<p style="text-align: center; color: var(--text-light);">暂无今日或昨日记录数据。</p>`;
+            return;
+        }
+
+        container.innerHTML = mainHtml + uniqueHtml;
+    }
+
+
+    // =======================================================================
+    // 3. 数据导入逻辑
+    // =======================================================================
+    function importDataFromCSV(event) {
+        const file = event.target.files[0];
+        if (!file) {
+            showNotification("未选择文件", "error");
+            return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            try {
+                const csvText = e.target.result;
+                const importedLogs = parseCSV(csvText);
+                mergeImportedLogs(importedLogs);
+                // 导入后，通知用户并自动刷新
+                showNotification(`成功导入 ${importedLogs.length} 条记录，已自动刷新`, "success");
+            } catch (error) {
+                console.error("导入失败:", error);
+                showNotification("数据导入失败: 文件格式不正确或解析错误", "error");
+            } finally {
+                 // 清空文件输入，允许重新选择相同文件
+                document.getElementById('importFile').value = '';
+            }
+        };
+        reader.readAsText(file);
+    }
+    
+    function parseCSV(csvText) {
+        // 使用更精确的正则匹配来处理逗号在值内的情况（但假设导出的值没有逗号）
+        const lines = csvText.trim().split('\n');
+        const headers = lines[0].split(',').map(h => h.trim());
+        if (headers.length < 6) throw new Error("CSV文件头不正确");
+        
+        const logsToImport = [];
+        // 从第二行开始处理数据
+        for (let i = 1; i < lines.length; i++) {
+            // 简单拆分，假设值中没有逗号，并处理可能存在的引号
+            const values = lines[i].split(',').map(v => v.trim().replace(/^"|"$/g, ''));
+            if (values.length < 6) continue; // Skip invalid lines
+            
+            const [user, dateStr, timeStr, type, value, info] = values;
+            
+            // Reconstruct timestamp
+            const timestamp = new Date(`${dateStr.replace(/-/g, '/')} ${timeStr}`).getTime();
+            if (isNaN(timestamp)) continue; // Skip if date/time invalid
+            
+            let val;
+            let logType = type;
+            
+            if (type === '饮水') {
+                logType = 'water';
+                val = parseInt(value.replace('ml', '')) || 0;
+            } else if (type === '体重') {
+                logType = 'weight';
+                
+                // NEW: 解析体重记录的附加信息
+                // info format: "体重: 75.0kg | 体脂率: 20.0% | BMI: 24.5"
+                const infoParts = info.split(' | ');
+                const weightVal = infoParts[0] ? parseFloat(infoParts[0].split(': ')[1].replace('kg', '')) : 0;
+                const bodyFatVal = infoParts[1] ? parseFloat(infoParts[1].split(': ')[1].replace('%', '')) : 0;
+                const bmiVal = infoParts[2] ? parseFloat(infoParts[2].split(': ')[1]) : calculateBMI(weightVal, DEFAULT_HEIGHT);
+
+                val = {
+                    weight: weightVal,
+                    bodyFat: bodyFatVal,
+                    bmi: bmiVal.toFixed(1)
+                };
+            } else if (type === '睡眠') {
+                logType = 'sleep';
+                val = value; // Sleep is a string
+            } else if (type === '排尿') {
+                logType = 'pee';
+                val = '排尿';
+            } else if (type === '排便') {
+                logType = 'poop';
+                val = '排便';
+            } else if (type === '饮食') {
+                logType = 'food';
+                // info format: "餐别: xxx | 内容: xxx | 热量: xxx Kcal"
+                const infoParts = info.split(' | ');
+                const mealTypeStr = infoParts[0].split(': ')[1];
+                const mealTypeMap = { '早餐': 'breakfast', '午餐': 'lunch', '晚餐': 'dinner' };
+                const mealTypeVal = mealTypeMap[mealTypeStr] || 'other';
+                
+                const description = infoParts[1] ? infoParts[1].split(': ')[1] : '未记录内容';
+                const calories = infoParts[2] ? parseInt(infoParts[2].split(': ')[1].replace(' Kcal', '')) : 0;
+                
+                val = {
+                    mealType: mealTypeVal,
+                    description: description,
+                    calories: calories
+                };
+            } else if (type === '运动') {
+                logType = 'fitness';
+                // info format: "类型: xxx | 时长: xxx 分钟 | 卡路里: xxx Kcal"
+                const infoParts = info.split(' | ');
+                const fitnessTypeStr = infoParts[0].split(': ')[1];
+                const duration = infoParts[1] ? parseInt(infoParts[1].split(': ')[1].replace(' 分钟', '')) : 0;
+                const calories = infoParts[2] ? parseInt(infoParts[2].split(': ')[1].replace(' Kcal', '')) : 0;
+
+                val = {
+                    type: fitnessTypeStr,
+                    duration: duration,
+                    calories: calories
+                };
+            } else {
+                continue; // Skip unknown type
+            }
+            
+            logsToImport.push({
+                type: logType,
+                val: val,
+                timestamp: timestamp,
+                originalUser: user // Store user for later grouping
+            });
+        }
+        return logsToImport;
+    }
+    
+    function mergeImportedLogs(newLogs) {
+        const users = ['Me', 'Wife', 'Family'];
+        const userLogsMap = {};
+        
+        // 1. Load existing data for all users
+        users.forEach(user => {
+            const key = getStorageKey(user);
+            const storedLogs = localStorage.getItem(key);
+            userLogsMap[user] = storedLogs ? JSON.parse(storedLogs) : [];
+        });
+
+        newLogs.forEach(log => {
+            const targetUser = log.originalUser;
+            if (userLogsMap[targetUser]) {
+                // Check for duplicates based on timestamp
+                const isDuplicate = userLogsMap[targetUser].some(existingLog => existingLog.timestamp === log.timestamp);
+
+                if (!isDuplicate) {
+                    // Remove originalUser property before saving back to user's local storage
+                    const logToSave = { type: log.type, val: log.val, timestamp: log.timestamp };
+                    userLogsMap[targetUser].push(logToSave);
+                }
+            }
+        });
+
+        // 3. Save merged data back to localStorage for each user
+        users.forEach(user => {
+            localStorage.setItem(getStorageKey(user), JSON.stringify(userLogsMap[user]));
+        });
+        
+        // After merging, reload and re-render the current view
+        loadLogsForUser(currentUser);
+        saveAndRender(); 
+    }
+
+    // =======================================================================
+    // 用户切换逻辑
+    // =======================================================================
+    function switchUser(newUser) {
+        if (newUser === currentUser) return;
+        saveLogsForUser(currentUser);
+        currentUser = newUser;
+        loadLogsForUser(currentUser);
+        document.querySelectorAll('.user-tab').forEach(tab => {
+            tab.classList.remove('active');
+        });
+        document.querySelector(`.user-tab[data-user="${newUser}"]`).classList.add('active');
+        // 更新所有功能区的当前用户提示
+        document.getElementById('currentUserName_Water').textContent = userMap[newUser];
+        document.getElementById('currentUserName_Weight').textContent = userMap[newUser];
+        document.getElementById('currentUserName_Sleep').textContent = userMap[newUser];
+        document.getElementById('currentUserName_Food').textContent = userMap[newUser];
+        document.getElementById('currentUserName_Fitness').textContent = userMap[newUser];
+        document.getElementById('currentUserName_Body').textContent = userMap[newUser];
+        saveAndRender(); // 确保切换用户后立即刷新所有数据
+        showNotification(`已切换到 [${userMap[newUser]}] 的记录`, "success");
+    }
+    // =======================================================================
+    // 时钟逻辑
+    // =======================================================================
+    function updateClock() {
+        const now = new Date();
+        const dateElement = document.getElementById('currentDate');
+        const timeElement = document.getElementById('currentTime');
+        const dateFormatted = getFormatedDateString(now);
+        const timeFormatted = now.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit', second: '2-digit', timeZone: 'Asia/Shanghai', hour12: false });
+        dateElement.textContent = dateFormatted;
+        timeElement.textContent = `北京时间: ${timeFormatted}`;
+    }
+    // =======================================================================
+    // 初始化与渲染
+    // =======================================================================
+    function initializeApp() {
+        updateClock();
+        setInterval(updateClock, 1000);
+        
+        const initialUserTab = document.querySelector('.user-tab.active');
+        currentUser = initialUserTab ? initialUserTab.getAttribute('data-user') : 'Me';
+        loadLogsForUser(currentUser);
+        
+        // 1. 实现: 今日动态的排序方式默认用户类别
+        const logSortSelect = document.getElementById('logSort'); 
+        logSortSelect.value = 'user_category'; // 确保默认使用用户类别排序
+        
+        // 初始化时切换一次用户，确保加载和UI更新
+        switchUser(currentUser); 
+        
+        // NEW: 监听体重输入变化，实时计算 BMI
+        document.getElementById('weightInput').addEventListener('input', updateBMIDisplay);
+    }
+    
+    // NEW: 实时更新 BMI 显示
+    function updateBMIDisplay() {
+        const weight = parseFloat(document.getElementById('weightInput').value);
+        const bmi = calculateBMI(weight);
+        document.getElementById('bmiDisplay').textContent = `BMI: ${bmi}`;
+    }
+
+    function render() {
+        const logList = document.getElementById('logList');
+        const waterTotalElem = document.getElementById('waterTotal');
+        const waterBar = document.getElementById('waterBar');
+        const progressText = document.getElementById('progressText');
+        const totalCaloriesElem = document.getElementById('totalCalories');
+        logList.innerHTML = '';
+        const todayStr = getDateStr(new Date());
+        
+        let waterSum = 0; 
+        let calorieSum = 0;
+
+        // 1. 统计数据：基于当前用户的今日记录 (已应用每日独一逻辑)
+        const todayCurrentUserLogs = logs.filter(log => getDateStr(new Date(log.timestamp)) === todayStr);
+        let statisticalLogs = todayCurrentUserLogs.filter(log => !DAILY_UNIQUE_TYPES.includes(log.type));
+        
+        // 添加今日唯一记录 (体重, 睡眠)
+        DAILY_UNIQUE_TYPES.forEach(type => {
+            const latestLog = todayCurrentUserLogs
+                .filter(log => log.type === type)
+                .sort((a, b) => b.timestamp - a.timestamp) 
+                [0]; 
+            if (latestLog) {
+                statisticalLogs.push(latestLog);
+            }
+        });
+
+        // 统计饮水和热量 (只统计当前用户，用于进度条和输入区域)
+        statisticalLogs.forEach(log => {
+            if (log.type === 'water') {
+                waterSum += log.val;
+            } else if (log.type === 'food') {
+                calorieSum += log.val.calories || 0;
+            } else if (log.type === 'fitness') {
+                 calorieSum += log.val.calories || 0; // 运动消耗也计入总热量统计
+            }
+        });
+
+        // 2. 渲染饮水进度条
+        const waterPercent = Math.min(100, Math.round((waterSum / GOAL_WATER) * 100));
+        waterTotalElem.textContent = `${waterSum} ml`;
+        waterBar.style.width = `${waterPercent}%`;
+        progressText.textContent = `${waterPercent}% (${waterSum}/${GOAL_WATER} ml)`;
+        if (waterPercent > 50) {
+            progressText.style.left = '50%';
+            progressText.style.transform = 'translateX(-50%)';
+            progressText.style.color = 'white';
+        } else {
+             progressText.style.left = waterPercent > 0 ? `${waterPercent}%` : '5px';
+             progressText.style.transform = 'translateX(0)';
+             progressText.style.color = waterPercent > 50 ? 'white' : 'var(--water)';
+        }
+        waterBar.style.background = waterPercent >= 100 
+            ? 'var(--water)' 
+            : 'linear-gradient(90deg, var(--water), #64b5f6)';
+
+        // 3. 渲染饮食记录状态
+        totalCaloriesElem.textContent = calorieSum;
+        renderMealStatus('breakfast');
+        renderMealStatus('lunch');
+        renderMealStatus('dinner');
+        
+        // 4. 渲染今日动态列表
+        if (allTodayLogs.length === 0) {
+            logList.innerHTML = `<li class="empty-state card">
+                <i class="fas fa-box-open"></i>
+                <p>暂无今日记录，快去添加吧！</p>
+            </li>`;
+            return;
+        }
+
+        // 排序逻辑
+        const sortType = document.getElementById('logSort').value;
+        const sortedLogs = [...allTodayLogs].sort((a, b) => {
+            // 默认按时间倒序
+            return b.timestamp - a.timestamp; 
+        });
+
+        // 按时间排序
+        if (sortType === 'time') {
+            sortedLogs.sort((a, b) => a.timestamp - b.timestamp);
+            sortedLogs.forEach((log) => {
+                logList.appendChild(createLogListItem(log));
+            });
+            return;
+        }
+
+        // 按类别或用户类别排序（需要分组）
+        let groupedLogs = {};
+
+        sortedLogs.forEach((log) => {
+            let typeKey = log.type;
+            if (log.type === 'food') {
+                typeKey = `food_${log.val.mealType}`;
+            }
+            
+            const groupKey = sortType === 'user_category' ? `${log.originalUser}_${typeKey}` : typeKey;
+            
+            if (!groupedLogs[groupKey]) groupedLogs[groupKey] = [];
+            
+            // 仅在按时间排序时才保证所有记录都在，这里我们对非 unique 类型保留所有，对 unique 类型只保留最新一条
+            const isUniqueType = DAILY_UNIQUE_TYPES.includes(log.type);
+            
+            // 如果是 unique 类型，只保留最新一条
+            if (!isUniqueType || groupedLogs[groupKey].length === 0 || groupedLogs[groupKey][0].timestamp < log.timestamp) {
+                if (isUniqueType) groupedLogs[groupKey] = []; // 清空旧的唯一记录
+                groupedLogs[groupKey].push(log);
+            }
+        });
+        
+        // 获取排序后的分组键
+        let sortedGroupKeys;
+        if (sortType === 'user_category') {
+            // 按照用户优先级 > 类别优先级排序
+            sortedGroupKeys = Object.keys(groupedLogs).sort((a, b) => {
+                const [userA, categoryA] = a.split('_');
+                const [userB, categoryB] = b.split('_');
+                
+                const userOrderA = USER_SORT_ORDER[userA] || 99;
+                const userOrderB = USER_SORT_ORDER[userB] || 99;
+                
+                if (userOrderA !== userOrderB) {
+                    return userOrderA - userOrderB;
+                }
+
+                const categoryOrderA = LOG_SORT_ORDER[categoryA] || 99;
+                const categoryOrderB = LOG_SORT_ORDER[categoryB] || 99;
+                return categoryOrderA - categoryOrderB;
+            });
+        } else { // category sort
+            // 按照类别优先级排序
+             sortedGroupKeys = Object.keys(groupedLogs).sort((a, b) => {
+                return (LOG_SORT_ORDER[a] || 99) - (LOG_SORT_ORDER[b] || 99);
+            });
+        }
+
+        // 渲染分组后的列表
+        let lastUser = null;
+        sortedGroupKeys.forEach(groupKey => {
+            const logsOfGroup = groupedLogs[groupKey];
+            
+            let currentUserGroup = '';
+            let typeKey = groupKey;
+            
+            if (sortType === 'user_category') {
+                [currentUserGroup, typeKey] = groupKey.split('_');
+            } else { // category sort
+                // 在 category sort 中，每个 log 仍然有 originalUser 属性
+                currentUserGroup = logsOfGroup[0].originalUser; 
+            }
+            
+            // 只有在按用户类别排序时，才显示大用户分组标题
+            if (sortType === 'user_category' && currentUserGroup !== lastUser) {
+                const userTitleLi = document.createElement('li');
+                userTitleLi.className = 'log-group-title';
+                userTitleLi.style.cssText = 'background: #e1f5fe; color: #0277bd; border-bottom: 3px solid #0277bd; margin-top: 25px; padding-left: 10px; border-radius: 8px 8px 0 0;';
+                userTitleLi.textContent = `👤 ${userMap[currentUserGroup] || currentUserGroup} 的今日记录`;
+                logList.appendChild(userTitleLi);
+                lastUser = currentUserGroup;
+            }
+            
+            let groupName = TYPE_NAMES[typeKey] || typeKey;
+            const categoryTitleLi = document.createElement('li');
+            categoryTitleLi.className = 'log-group-title';
+            categoryTitleLi.style.cssText = 'font-weight: 600; color: var(--text); font-size: 1rem; border-bottom: 1px solid #ccc; margin-top: 0; padding-left: 15px;';
+            categoryTitleLi.textContent = `— ${groupName}`;
+            logList.appendChild(categoryTitleLi);
+
+            // 只有非 Weight/Sleep 类型才需要按时间排序
+            if (!DAILY_UNIQUE_TYPES.includes(typeKey.replace('food_', ''))) 
+            {
+                logsOfGroup.sort((a, b) => a.timestamp - b.timestamp);
+            }
+
+            logsOfGroup.forEach((log) => {
+                logList.appendChild(createLogListItem(log));
+            });
+        });
+    }
+
+    // 辅助函数：创建单个日志列表项
+    function createLogListItem(log) {
+        const li = document.createElement('li');
+        li.className = 'log-item';
+        let contentText = '';
+        let iconClass = '';
+        let logTypeForColor = log.type;
+
+        if(log.type === 'water') {
+            contentText = `饮水 ${log.val}ml`;
+            iconClass = 'fas fa-tint';
+        } else if(log.type === 'food') {
+            const mealMap = { breakfast: '早餐', lunch: '午餐', dinner: '晚餐' };
+            const mealName = mealMap[log.val.mealType] || '饮食';
+            const description = log.val.description;
+            const calories = log.val.calories || 0;
+            let calText = calories > 0 ? ` (${calories} Kcal)` : '';
+            let descText = description && description !== '未记录内容' ? `: ${description}` : '';
+            contentText = `<span style="font-weight: 600;">${mealName}</span>${descText}${calText}`;
+            iconClass = 'fas fa-utensils';
+        } else if(log.type === 'pee') {
+            contentText = `排尿打卡`;
+            iconClass = 'fas fa-tint';
+        } else if(log.type === 'poop') {
+            contentText = `排便打卡`;
+            iconClass = 'fas fa-poop';
+        } else if(log.type === 'fitness') {
+            const typeMap = { running: '跑步', walking: '步行', weightlifting: '力量训练', yoga: '瑜伽', other: '运动' };
+            const duration = log.val.duration || 'N/A';
+            const calories = log.val.calories || 0;
+            contentText = `${typeMap[log.val.type]} ${duration}分钟 (${calories} kcal)`;
+            iconClass = 'fas fa-running';
+        } else if(log.type === 'weight') {
+            // NEW: 显示体重、体脂率和 BMI
+            const weightVal = log.val.weight || 'N/A';
+            const bodyFatVal = log.val.bodyFat !== undefined && log.val.bodyFat !== null ? log.val.bodyFat : 'N/A';
+            const bmiVal = log.val.bmi || calculateBMI(weightVal); // 兼容旧数据
+            contentText = `体重:${weightVal}kg / 体脂:${bodyFatVal}% / BMI:${bmiVal}`;
+            iconClass = 'fas fa-weight';
+        } else if(log.type === 'sleep') {
+            contentText = `睡眠：${log.val}`;
+            iconClass = 'fas fa-bed';
+        }
+
+        const dateObj = new Date(log.timestamp);
+        const datePart = dateObj.toLocaleDateString('zh-CN', { month: '2-digit', day: '2-digit' }).replace(/\//g, '-');
+        const timePart = dateObj.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
+        const fullTimeStr = `${datePart} ${timePart}`;
+
+        const moduleColor = TYPE_COLORS[logTypeForColor] || 'var(--text)';
+        
+        // 用户标签样式
+        const userTagClass = `log-user-tag user-${log.originalUser.toLowerCase()}`;
+        const userTagHtml = `<span class="${userTagClass}">${userMap[log.originalUser]}</span>`;
+
+        li.innerHTML = `
+            <div class="log-content">
+                <i class="log-icon ${iconClass}" style="color: ${moduleColor};"></i> 
+                ${userTagHtml} 
+                ${contentText}
+            </div>
+            <div class="log-time">
+                ${timePart}
+                <i class="fas fa-edit log-edit" title="修改时间" onclick="modifyLogTime('${log.originalUser}', ${log.timestamp})"></i>
+                <i class="fas fa-trash-alt log-del" title="删除记录" onclick="deleteLog('${log.originalUser}', ${log.timestamp})"></i>
+            </div>
+        `;
+        return li;
+    }
+
+    // =======================================================================
+    // 饮食记录状态与编辑
+    // =======================================================================
+    function renderMealStatus(mealType) {
+        const mealGroup = document.getElementById(`mealGroup_${mealType}`);
+        const descInput = document.getElementById(`foodInput_${mealType}`);
+        const calInput = document.getElementById(`calorieInput_${mealType}`);
+        const recordBtn = document.getElementById(`recordBtn_${mealType}`);
+        const editBtn = document.getElementById(`editBtn_${mealType}`);
+        const displayDiv = document.getElementById(`display_${mealType}`);
+
+        const todayStr = getDateStr(new Date());
+        const mealLog = logs.find(log => log.type === 'food' && log.val.mealType === mealType && getDateStr(new Date(log.timestamp)) === todayStr);
+
+        recordBtn.innerHTML = `<i class="fas fa-check"></i> 记录`;
+
+        if (mealLog) {
+            mealGroup.classList.add('recorded');
+            recordBtn.style.display = 'none';
+            editBtn.style.display = 'flex';
+            displayDiv.style.display = 'block';
+            
+            const description = mealLog.val.description;
+            const calories = mealLog.val.calories || 0;
+            
+            displayDiv.innerHTML = `
+                <i class="fas fa-list-alt"></i> 内容: ${description} | <i class="fas fa-fire"></i> 热量: ${calories} Kcal
+            `;
+            descInput.value = description;
+            calInput.value = calories;
+        } else {
+            mealGroup.classList.remove('recorded');
+            editBtn.style.display = 'none';
+            displayDiv.style.display = 'none';
+            descInput.value = '';
+            calInput.value = '';
+        }
+    }
+
+    function editMeal(mealType) {
+        const mealGroup = document.getElementById(`mealGroup_${mealType}`);
+        const recordBtn = document.getElementById(`recordBtn_${mealType}`);
+        const editBtn = document.getElementById(`editBtn_${mealType}`);
+        const displayDiv = document.getElementById(`display_${mealType}`);
+        
+        mealGroup.classList.remove('recorded');
+        recordBtn.style.display = 'flex';
+        recordBtn.innerHTML = `<i class="fas fa-save"></i> 保存修改`;
+        editBtn.style.display = 'none';
+        displayDiv.style.display = 'none';
+        
+        showNotification(`[${TYPE_NAMES[mealType]}] 进入修改模式`, "info");
+    }
+
+    // =======================================================================
+    // 记录添加逻辑
+    // =======================================================================
+    function addRecord(type, value) {
+        const currentTime = new Date().getTime();
+        if (lastRecordTime[type] && (currentTime - lastRecordTime[type] < RECORD_COOLDOWN_MS)) {
+            const remaining = Math.ceil((RECORD_COOLDOWN_MS - (currentTime - lastRecordTime[type])) / 1000);
+            showNotification(`请勿重复记录太快，${TYPE_NAMES[type] || '记录'} 还需要等待 ${remaining} 秒`, "error");
+            return;
+        }
+        
+        const newLog = {
+            type: type,
+            val: value,
+            timestamp: currentTime,
+        };
+        logs.push(newLog);
+        lastRecordTime[type] = currentTime;
+        saveAndRender();
+
+        let message = "";
+        if (type === 'water') message = `已记录饮水 ${value}ml`;
+        else if (type === 'pee') message = "已记录排尿";
+        else if (type === 'poop') message = "已记录排便";
+        showNotification(message, "success");
+    }
+
+    // **核心函数：处理每日独一的记录类型 (体重, 睡眠)**
+    function addOrUpdateUniqueDailyRecord(type, value) {
+        const currentTime = new Date().getTime();
+        const todayStr = getDateStr(new Date());
+
+        if (lastRecordTime[type] && (currentTime - lastRecordTime[type] < RECORD_COOLDOWN_MS)) {
+            const remaining = Math.ceil((RECORD_COOLDOWN_MS - (currentTime - lastRecordTime[type])) / 1000);
+            showNotification(`请勿重复记录太快，${TYPE_NAMES[type] || '记录'} 还需要等待 ${remaining} 秒`, "error");
+            return;
+        }
+
+        const existingIndex = logs.findIndex(log => log.type === type && getDateStr(new Date(log.timestamp)) === todayStr );
+        
+        let action = '新增';
+        let message = '';
+
+        if (existingIndex !== -1) {
+            logs[existingIndex].val = value;
+            logs[existingIndex].timestamp = currentTime;
+            action = '更新';
+        } else {
+            const newLog = {
+                type: type,
+                val: value,
+                timestamp: currentTime,
+            };
+            logs.push(newLog);
+        }
+
+        lastRecordTime[type] = currentTime;
+
+        if (type === 'weight') message = `${action}体重记录：${value.weight}kg / 体脂率：${value.bodyFat}%`;
+        else if (type === 'sleep') message = `${action}睡眠记录：${value}`;
+        
+        saveAndRender();
+        showNotification(message, "success");
+    }
+
+    function addWeight() {
+        const weightInput = document.getElementById('weightInput');
+        const bodyFatInput = document.getElementById('bodyFatInput');
+        
+        const weight = parseFloat(weightInput.value);
+        const bodyFat = parseFloat(bodyFatInput.value);
+
+        if (weight > 0) {
+            const bmi = calculateBMI(weight);
+            const weightData = {
+                weight: weight,
+                // 如果未输入体脂率，则默认为 0 或 null
+                bodyFat: isNaN(bodyFat) ? null : bodyFat, 
+                bmi: bmi
+            };
+            addOrUpdateUniqueDailyRecord('weight', weightData);
+            weightInput.value = '';
+            bodyFatInput.value = '';
+            document.getElementById('bmiDisplay').textContent = 'BMI: N/A'; // 清空 BMI 显示
+        } else {
+            showNotification("请输入有效的体重", "error");
+        }
+    }
+
+    function addSleep() {
+        const sleepTime = document.getElementById('sleepTime').value.trim();
+        if (sleepTime) {
+            addOrUpdateUniqueDailyRecord('sleep', sleepTime);
+        } else {
+            showNotification("请输入睡眠时长", "error");
+        }
+    }
+
+    function addMeal(mealType) {
+        const descInput = document.getElementById(`foodInput_${mealType}`);
+        const calInput = document.getElementById(`calorieInput_${mealType}`);
+        const recordBtn = document.getElementById(`recordBtn_${mealType}`);
+        
+        const description = descInput.value.trim();
+        const calories = parseInt(calInput.value) || 0;
+        const isEditing = recordBtn.textContent.includes('保存修改');
+        
+        if (description || (calories > 0)) {
+            const foodData = {
+                mealType: mealType,
+                description: description || '未记录内容',
+                calories: calories
+            };
+
+            const todayStr = getDateStr(new Date());
+            const mealLogIndex = logs.findIndex(log => log.type === 'food' && log.val.mealType === mealType && getDateStr(new Date(log.timestamp)) === todayStr );
+
+            if (mealLogIndex !== -1 && isEditing) {
+                logs[mealLogIndex].val = foodData;
+                logs[mealLogIndex].timestamp = new Date().getTime();
+                recordBtn.innerHTML = `<i class="fas fa-check"></i> 记录`;
+                showNotification(`[${TYPE_NAMES[mealType]}] 修改已保存`, "success");
+            } else if (mealLogIndex === -1 && !isEditing) {
+                const newLog = {
+                    type: 'food',
+                    val: foodData,
+                    timestamp: new Date().getTime(),
+                };
+                logs.push(newLog);
+                showNotification(`已记录${TYPE_NAMES[mealType]} (${calories} Kcal)`, "success");
+            } else {
+                showNotification(`[${TYPE_NAMES[mealType]}] 已记录，请点击修改按钮`, "error");
+                return;
+            }
+
+            saveAndRender();
+        } else {
+            const mealMap = { breakfast: '早餐', lunch: '午餐', dinner: '晚餐' };
+            showNotification(`请输入${mealMap[mealType]}的内容或热量`, "error");
+        }
+    }
+
+    function addFitness() {
+        const type = document.getElementById('fitnessType').value;
+        const durationInput = document.getElementById('fitnessDuration');
+        const caloriesInput = document.getElementById('fitnessCalories');
+        
+        const duration = parseInt(durationInput.value);
+        const calories = parseInt(caloriesInput.value);
+
+        if (duration > 0) {
+            const fitnessData = {
+                type: type,
+                duration: duration,
+                calories: calories ||
+                0
+            };
+            addRecord('fitness', fitnessData);
+            durationInput.value = '';
+            caloriesInput.value = '';
+        } else {
+            showNotification("请输入有效的运动时长", "error");
+        }
+    }
+
+    // =======================================================================
+    // 数据操作与通知 (跨用户操作)
+    // =======================================================================
+    function deleteLog(originalUser, timestamp) {
+        if(confirm('确定删除这条记录吗？')) {
+            // 1. 获取目标用户的 logs 数组 (完整历史记录)
+            let userLogsStr = localStorage.getItem(getStorageKey(originalUser));
+            let userLogs = userLogsStr ? JSON.parse(userLogsStr) : [];
+
+            // 2. 找到并删除记录 (通过时间戳唯一标识)
+            const indexInStorage = userLogs.findIndex(log => log.timestamp === timestamp);
+            
+            if (indexInStorage !== -1) {
+                userLogs.splice(indexInStorage, 1);
+                // 3. 存回 localStorage
+                localStorage.setItem(getStorageKey(originalUser), JSON.stringify(userLogs));
+                
+                // 4. 如果删除的是当前用户的数据，需要更新内存中的 logs
+                if (originalUser === currentUser) {
+                    logs = userLogs;
+                }
+                
+                showNotification(`[${userMap[originalUser]}] 的记录删除成功`, "success");
+            } else {
+                 showNotification("记录不存在或已被删除", "error");
+            }
+
+            // 5. 刷新所有列表和统计
+            saveAndRender(); 
+        }
+    }
+
+    function clearData() {
+        if(confirm(`确定清空 [${userMap[currentUser]}] 今日所有记录吗？ (此操作不可撤销)`)) {
+            const todayStr = getDateStr(new Date());
+            // 筛选出非今日的记录
+            const retainedLogs = logs.filter(log => getDateStr(new Date(log.timestamp)) !== todayStr);
+            logs = retainedLogs;
+            
+            saveAndRender();
+            showNotification(`已清空 [${userMap[currentUser]}] 今日所有记录`, "success");
+        }
+    }
+
+    function exportDataToCSV() {
+        try {
+            const users = ['Me', 'Wife', 'Family'];
+            let fullLogs = [];
+            
+            // 汇总所有用户的历史数据
+            users.forEach(user => {
+                const storedLogs = localStorage.getItem(getStorageKey(user));
+                const userLogs = storedLogs ? JSON.parse(storedLogs) : [];
+                // 附加用户标签
+                userLogs.forEach(log => fullLogs.push({...log, originalUser: user}));
+            });
+
+            if (fullLogs.length === 0) {
+                showNotification("没有数据可以导出！", "error");
+                return;
+            }
+
+            fullLogs.sort((a, b) => a.timestamp - b.timestamp);
+
+            const headers = ["用户", "日期", "时间", "类型", "值", "附加信息"];
+            let csvContent = headers.join(",") + "\n";
+            
+            fullLogs.forEach(log => {
+                const dateObj = new Date(log.timestamp);
+                const datePart = dateObj.toLocaleDateString('zh-CN', { year: 'numeric', month: '2-digit', day: '2-digit' }).replace(/\//g, '-');
+                const timePart = dateObj.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
+
+                let typeText = '';
+                let value = '';
+                let info = '';
+
+                if(log.type === 'water') {
+                    typeText = '饮水';
+                    value = log.val + 'ml';
+                } else if(log.type === 'food') {
+                    const mealMap = { breakfast: '早餐', lunch: '午餐', dinner: '晚餐' };
+                    typeText = '饮食';
+                    const mealName = mealMap[log.val.mealType] || '其他餐';
+                    const description = log.val.description || '无描述';
+                    const calories = log.val.calories || 0;
+                    value = `${calories} Kcal`;
+                    info = `餐别: ${mealName} | 内容: ${description} | 热量: ${calories} Kcal`;
+                } else if(log.type === 'pee') {
+                    typeText = '排尿';
+                    value = 'N/A';
+                } else if(log.type === 'poop') {
+                    typeText = '排便';
+                    value = 'N/A';
+                } else if(log.type === 'fitness') {
+                    const typeMap = { running: '跑步', walking: '步行', weightlifting: '力量训练', yoga: '瑜伽', other: '其他' };
+                    typeText = '运动';
+                    const fitnessType = typeMap[log.val.type] || 'N/A';
+                    const duration = log.val.duration || 0;
+                    const calories = log.val.calories || 0;
+                    value = `${calories} Kcal`;
+                    info = `类型: ${fitnessType} | 时长: ${duration} 分钟 | 卡路里: ${calories} Kcal`;
+                } else if(log.type === 'weight') {
+                    // NEW: 导出体重、体脂和 BMI
+                    typeText = '体重';
+                    const weightVal = log.val.weight || 0;
+                    const bodyFatVal = log.val.bodyFat !== undefined && log.val.bodyFat !== null ? log.val.bodyFat : 'N/A';
+                    const bmiVal = log.val.bmi || calculateBMI(weightVal);
+                    value = `${weightVal}kg`;
+                    info = `体重: ${weightVal}kg | 体脂率: ${bodyFatVal}% | BMI: ${bmiVal}`;
+                } else if(log.type === 'sleep') {
+                    typeText = '睡眠';
+                    value = log.val; // e.g., 7h30min
+                }
+
+                // 清理 CSV 注入风险和引号
+                const cleanStr = (str) => String(str).replace(/"/g, '""');
+                
+                csvContent += [
+                    cleanStr(log.originalUser), 
+                    cleanStr(datePart), 
+                    cleanStr(timePart), 
+                    cleanStr(typeText), 
+                    cleanStr(value), 
+                    `"${cleanStr(info)}"` // 附加信息可能包含逗号，用引号包住
+                ].join(",") + "\n";
+            });
+            
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.setAttribute('href', url);
+            a.setAttribute('download', `健康记录_${new Date().toLocaleDateString('zh-CN')}.csv`);
+            
+            document.body.appendChild(a);
+            
+            a.click();
+            
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            showNotification("数据导出成功", "success");
+        } catch (e) {
+            console.error("导出失败:", e);
+            showNotification("数据导出失败", "error");
+        }
+    }
+
+    function showNotification(message, type = "success") {
+        const notification = document.getElementById('notification');
+        const notificationText = document.getElementById('notificationText');
+        
+        notificationText.textContent = message;
+        
+        if (type === "error") {
+            notification.style.background = "var(--error)"; 
+            notification.querySelector('i').className = "fas fa-exclamation-circle";
+        } else if (type === "success") {
+            notification.style.background = "var(--primary)";
+            notification.querySelector('i').className = "fas fa-check-circle";
+        } else if (type === "info") {
+            notification.style.background = "var(--fitness)"; 
+            notification.querySelector('i').className = "fas fa-info-circle";
+        }
+        
+        notification.classList.add('show');
+        
+        setTimeout(() => {
+            notification.classList.remove('show');
+        }, 3000);
+    }
+
+    function saveAndRender() {
+        saveLogsForUser(currentUser);
+        allTodayLogs = loadAllTodayLogs(); // 刷新所有用户的今日动态数据
+        calculateAllUsersSummary(); // 确保每次渲染时都重新计算所有用户的对比数据
+        render();
+    }
+
+    // 首次加载
+    initializeApp();
+</script>
+
+</body>
+</html>
